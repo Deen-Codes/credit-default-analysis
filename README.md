@@ -6,7 +6,7 @@ default?** An analysis of the UCI "Default of Credit Card Clients" dataset —
 months of repayment history and a default flag — using Python, SQL and
 dashboard tooling.
 
-**[→ Live Tableau dashboard](https://public.tableau.com/app/profile/deen.ali/viz/CreditCardDefaultRisk-UKPortfolioProject/Dashboard1)**
+**[→ Live dashboard](https://deen-codes.github.io/credit-default-analysis/)** · **[Tableau version](https://public.tableau.com/app/profile/deen.ali/viz/CreditCardDefaultRisk-UKPortfolioProject/Dashboard1)**
 
 > **Headline:** one missed payment changes everything. Customers current on
 > their payments defaulted at **13.8%**; one month behind, **34.0%**; two

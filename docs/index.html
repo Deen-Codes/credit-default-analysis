@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Who Defaults? Credit Risk in 30,000 Customers — Deen Ali</title>
+<!-- Dashboard for github.com/Deen-Codes/credit-default-analysis
+     Self-contained: data inlined from data/processed/, charts via Chart.js CDN. -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root { --bg:#0f1420; --card:#1a2130; --ink:#e8ecf4; --muted:#8b94a7;
+          --accent:#5b9dff; --accent2:#ff7a6b; }
+  * { box-sizing:border-box; margin:0; }
+  body { background:var(--bg); color:var(--ink);
+         font:15px/1.5 -apple-system,"Segoe UI",Roboto,sans-serif; padding:28px; }
+  h1 { font-size:26px; margin-bottom:4px; }
+  .sub { color:var(--muted); margin-bottom:6px; max-width:900px; }
+  .sub a { color:var(--accent); }
+  .kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
+          gap:14px; margin:22px 0; }
+  .kpi { background:var(--card); border-radius:12px; padding:16px 18px; }
+  .kpi .n { font-size:26px; font-weight:700; }
+  .kpi .l { color:var(--muted); font-size:13px; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .card { background:var(--card); border-radius:12px; padding:18px; }
+  .card h2 { font-size:15px; margin-bottom:2px; }
+  .card p { color:var(--muted); font-size:12.5px; margin-bottom:10px; }
+  .wide { grid-column:1/-1; }
+  canvas { max-height:320px; }
+  .foot { color:var(--muted); font-size:12.5px; margin-top:20px; max-width:900px; }
+  .foot a { color:var(--accent); }
+  @media (max-width:860px){ .grid{ grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+
+<h1>Who Defaults? Credit Card Risk in 30,000 Customers</h1>
+<p class="sub">UCI "Default of Credit Card Clients" dataset: demographics, credit limits, six
+months of repayment history, one default flag. Pipeline and SQL:
+<a href="https://github.com/Deen-Codes/credit-default-analysis">github.com/Deen-Codes/credit-default-analysis</a>
+&nbsp;·&nbsp; <a href="https://public.tableau.com/app/profile/deen.ali/viz/CreditCardDefaultRisk-UKPortfolioProject/Dashboard1">Tableau version</a></p>
+
+<div class="kpis">
+  <div class="kpi"><div class="n">22.1%</div><div class="l">overall default rate</div></div>
+  <div class="kpi"><div class="n">13.8% → 69.1%</div><div class="l">default rate, on-time vs two months late</div></div>
+  <div class="kpi"><div class="n">48%</div><div class="l">of defaulters were "on time" last month — the base-rate trap</div></div>
+  <div class="kpi"><div class="n">63.5%</div><div class="l">default rate in the three-rule "red" flag group</div></div>
+</div>
+
+<div class="grid">
+  <div class="card wide">
+    <h2>One missed payment changes everything</h2>
+    <p>Default rate by latest repayment status. Nothing demographic comes close to this gradient.</p>
+    <canvas id="status"></canvas>
+  </div>
+  <div class="card">
+    <h2>The credit limit already encodes risk</h2>
+    <p>Default rate falls monotonically as limits rise — the bank's own limit decision is a visible risk score.</p>
+    <canvas id="limits"></canvas>
+  </div>
+  <div class="card">
+    <h2>Where the defaulters actually are</h2>
+    <p>Rate is highest among the delinquent, but the on-time majority contributes the most defaulters.</p>
+    <canvas id="share"></canvas>
+  </div>
+</div>
+
+<p class="foot">Taiwan, 2005: behavioural patterns travel; absolute rates don't — treat this as a
+methods showcase, not a UK credit model. Limitations and cleaning log in the README.
+Data: UCI ML Repository (CC BY 4.0), Yeh, I-C. (2016).
+Built by <a href="https://github.com/Deen-Codes">Deen Ali</a> — five years in UK retail banking
+(fraud &amp; KYC) before moving into data analysis.</p>
+
+<script>
+const STATUS = [
+  { label:"on time",        rate:13.8, share:48.3 },
+  { label:"1 month late",   rate:34.0, share:18.9 },
+  { label:"2 months late",  rate:69.1, share:27.8 },
+  { label:"3+ months late", rate:71.9, share:5.0 }];
+const LIMITS = [
+  { label:"<NT$50k", rate:31.8 }, { label:"50–140k", rate:24.7 },
+  { label:"140–240k", rate:17.4 }, { label:"240k+", rate:14.0 }];
+
+Chart.defaults.color = "#8b94a7";
+Chart.defaults.borderColor = "rgba(255,255,255,.06)";
+Chart.defaults.font.family = '-apple-system,"Segoe UI",Roboto,sans-serif';
+const pct = v => v + "%";
+
+new Chart(status, { type:"bar",
+  data:{ labels: STATUS.map(d=>d.label),
+    datasets:[{ data: STATUS.map(d=>d.rate),
+      backgroundColor:["#5b9dff","#f0b660","#ff7a6b","#e3554b"] }]},
+  options:{ plugins:{ legend:{ display:false } },
+    scales:{ y:{ ticks:{ callback:pct }, title:{ display:true, text:"default rate" } } } } });
+
+new Chart(limits, { type:"bar",
+  data:{ labels: LIMITS.map(d=>d.label),
+    datasets:[{ data: LIMITS.map(d=>d.rate), backgroundColor:"#7fb3ff" }]},
+  options:{ plugins:{ legend:{ display:false } },
+    scales:{ y:{ ticks:{ callback:pct } } } } });
+
+new Chart(share, { type:"bar",
+  data:{ labels: STATUS.map(d=>d.label),
+    datasets:[
+      { label:"share of all defaulters", data: STATUS.map(d=>d.share), backgroundColor:"#5b9dff" },
+      { label:"default rate",            data: STATUS.map(d=>d.rate),  backgroundColor:"rgba(255,122,107,.7)" }]},
+  options:{ scales:{ y:{ ticks:{ callback:pct } } } } });
+</script>
+</body>
+</html>
