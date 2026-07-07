@@ -1,0 +1,15 @@
+# Rebuildable artefacts
+data/credit.db
+data/raw/*.xls
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# OS noise
+.DS_Store
+Thumbs.db
+
+# Local build notes — never published
+_build_notes/
